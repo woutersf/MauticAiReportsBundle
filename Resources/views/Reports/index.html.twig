@@ -1,0 +1,144 @@
+{% extends '@MauticCore/Default/content.html.twig' %}
+
+{% block mauticContent 'aiReports' %}
+
+{% block headerTitle %}
+    {{ 'Report with AI ✨'|trans }}
+{% endblock %}
+
+{% block content %}
+<div class="box-layout">
+    <div class="col-md-9 height-auto">
+        <div class="pa-md">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <form id="ai-reports-form" method="post" action="{{ path('mautic_ai_reports_index') }}">
+                        <div class="form-group">
+                            <label for="ai-reports-query" class="control-label">
+                                Show me the following data:
+                            </label>
+                            <textarea
+                                id="ai-reports-query"
+                                name="query"
+                                class="form-control"
+                                rows="6"
+                                placeholder="Emails and their open rate"
+                            >{{ query }}</textarea>
+                            <p class="help-block">
+                                Describe the data you want to see in natural language.
+                            </p>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">
+                                Show me the data
+                            </button>
+                            <a href="{{ path('mautic_report_index') }}" class="btn btn-default">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if error is not null %}
+            <div class="results">
+                <div class="panel panel-danger mt-lg">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Error</h3>
+                    </div>
+                    <div class="panel-body">
+                        <div class="alert alert-danger">
+                            {{ error }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if results is not null %}
+            <div class="results">
+                {% if results.prompt %}
+                <div class="panel panel-default mt-lg">
+                    <div class="panel-heading" style="cursor: pointer;" data-toggle="collapse" data-target="#promptCollapse">
+                        <h3 class="panel-title">
+                            <i class="fa fa-chevron-down"></i> AI Prompt
+                        </h3>
+                    </div>
+                    <div id="promptCollapse" class="panel-body collapse">
+                        <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px; overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;"><code>{{ results.prompt }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if results.sql_query %}
+                <div class="panel panel-info mt-lg">
+                    <div class="panel-heading" style="cursor: pointer;" data-toggle="collapse" data-target="#sqlQueryCollapse">
+                        <h3 class="panel-title">
+                            <i class="fa fa-chevron-down"></i> Generated SQL Query
+                        </h3>
+                    </div>
+                    <div id="sqlQueryCollapse" class="panel-body collapse">
+                        <pre style="background: #f5f5f5; padding: 15px; border-radius: 4px; overflow-x: auto;"><code>{{ results.sql_query }}</code></pre>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if results.data %}
+                <div class="panel panel-success mt-lg">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Query Results ({{ results.data.count }} rows)</h3>
+                    </div>
+                    <div class="panel-body">
+                        {% if results.data.rows|length > 0 %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            {% for columnName, columnValue in results.data.rows[0] %}
+                                                <th>{{ columnName }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in results.data.rows %}
+                                            <tr>
+                                                {% for columnName, columnValue in row %}
+                                                    <td>{{ columnValue }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info">
+                                No results found.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="col-md-3 bg-white height-auto bdr-l">
+        <div class="pa-md">
+            <h4 class="fw-sb">About AI Reports</h4>
+            <p class="text-muted">
+                Use natural language to describe the data you want to see, and AI will generate a custom report for you.
+            </p>
+
+            <h5 class="fw-sb mt-lg">Examples:</h5>
+            <ul class="text-muted">
+                <li>Emails and their open rate</li>
+                <li>Contacts by country</li>
+                <li>Campaign performance last 30 days</li>
+                <li>Top performing segments</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

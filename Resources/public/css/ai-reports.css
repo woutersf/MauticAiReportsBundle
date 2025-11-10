@@ -1,0 +1,17 @@
+/**
+ * AI Reports Plugin Styles
+ */
+
+#ai-reports-button {
+    vertical-align: middle;
+}
+
+#ai-reports-form textarea {
+    resize: vertical;
+}
+
+/* Ensure button visibility on reports page */
+.panel-heading #ai-reports-button {
+    margin-top: 0;
+    margin-bottom: 0;
+}
