@@ -7,6 +7,7 @@ return [
     'description' => 'AI-powered report generation interface for Mautic',
     'version'     => '1.0.0',
     'author'      => 'Mautic Community',
+    'icon'        => 'plugins/MauticAIconnectionBundle/Assets/img/mauticai.png',
 
     'routes' => [
         'main' => [

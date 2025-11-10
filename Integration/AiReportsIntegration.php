@@ -25,6 +25,14 @@ class AiReportsIntegration extends AbstractIntegration
     }
 
     /**
+     * Returns the description with configuration instructions.
+     */
+    public function getDescription(): string
+    {
+        return 'AI-powered report generation interface. Configuration for this plugin is available in Settings → Configuration (or /s/config/edit).';
+    }
+
+    /**
      * Returns the authentication type.
      * Using 'none' means no OAuth or API key authentication is required.
      */
@@ -47,6 +55,6 @@ class AiReportsIntegration extends AbstractIntegration
      */
     public function getIcon(): string
     {
-        return 'plugins/MauticAIconnectionBundle/Assets/img/mauticai.png';
+        return 'plugins/MauticAiReportsBundle/Assets/mauticai.png';
     }
 }
