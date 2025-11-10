@@ -41,4 +41,12 @@ class AiReportsIntegration extends AbstractIntegration
     {
         return [];
     }
+
+    /**
+     * Get the path to the integration icon
+     */
+    public function getIcon(): string
+    {
+        return 'plugins/MauticAIconnectionBundle/Assets/img/mauticai.png';
+    }
 }
