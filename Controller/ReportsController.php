@@ -6,11 +6,18 @@ namespace MauticPlugin\MauticAiReportsBundle\Controller;
 
 use Mautic\CoreBundle\Controller\CommonController;
 use MauticPlugin\MauticAiReportsBundle\Entity\AiReportsLog;
+use MauticPlugin\MauticAIconnectionBundle\Service\LiteLLMService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ReportsController extends CommonController
 {
+    public static function getSubscribedServices(): array
+    {
+        return array_merge(parent::getSubscribedServices(), [
+            'mautic.ai_connection.service.litellm' => LiteLLMService::class,
+        ]);
+    }
     /**
      * Display the AI Reports form and handle submission.
      */
@@ -235,17 +242,14 @@ class ReportsController extends CommonController
      */
     private function generateSqlQuery(string $userQuestion, string $databaseSchema): array
     {
+        // Get LiteLLM service
+        $liteLLMService = $this->container->get('mautic.ai_connection.service.litellm');
+
         // Get AI configuration from parameters
         $coreParametersHelper = $this->factory->getHelper('core_parameters');
-        $aiModel = $coreParametersHelper->get('ai_model', 'gpt-3.5-turbo');
+        $aiModel = $coreParametersHelper->get('ai_reports_model', 'gpt-3.5-turbo');
         $promptTemplate = $coreParametersHelper->get('ai_report_prompt', '');
-        $litellmEndpoint = $coreParametersHelper->get('litellm_endpoint');
-        $litellmSecretKey = $coreParametersHelper->get('litellm_secret_key');
         $allowGraphCreation = $coreParametersHelper->get('allow_graph_creation', false);
-
-        if (empty($litellmEndpoint) || empty($litellmSecretKey)) {
-            throw new \Exception('LiteLLM endpoint and secret key must be configured in AI Console settings');
-        }
 
         // Modify prompt based on graph creation setting
         if (!$allowGraphCreation) {
@@ -266,33 +270,22 @@ class ReportsController extends CommonController
             $promptTemplate
         );
 
-        // Call LiteLLM API
+        // Call LiteLLM service
         try {
-            $httpClient = new \GuzzleHttp\Client();
-
-            $payload = [
-                'model' => $aiModel,
-                'messages' => [
-                    [
-                        'role' => 'user',
-                        'content' => $prompt,
-                    ],
+            $messages = [
+                [
+                    'role' => 'user',
+                    'content' => $prompt,
                 ],
-                'stream' => false,
-                'max_tokens' => 2000,
-                'temperature' => 0.3,
             ];
 
-            $response = $httpClient->post($litellmEndpoint . '/chat/completions', [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $litellmSecretKey,
-                    'Content-Type' => 'application/json',
-                ],
-                'body' => json_encode($payload),
-                'timeout' => 120,
-            ]);
+            $options = [
+                'model' => $aiModel,
+                'temperature' => 0.3,
+                'max_tokens' => 2000,
+            ];
 
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseData = $liteLLMService->getChatCompletion($messages, $options);
 
             if (!isset($responseData['choices'][0]['message']['content'])) {
                 throw new \Exception('Invalid response from AI service');

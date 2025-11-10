@@ -29,6 +29,8 @@
 
 The Mautic AI Reports Bundle provides an experimental natural language interface for generating database reports. Users can ask questions in plain language, and the AI will generate and execute SQL queries to answer them.
 
+![AI Reports Interface](Assets/aireport.png)
+
 **Example:**
 - User: "How many contacts were created last month?"
 - AI: Generates `SELECT COUNT(*) FROM leads WHERE date_added >= DATE_SUB(NOW(), INTERVAL 1 MONTH)`
